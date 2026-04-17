@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#fffff8">
+  <meta name="application-name" content="Folio">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Folio">
+  <title>Folio</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./version.js"></script>
+  <script src="./config.js"></script>
+  <script type="module" src="./main.js"></script>
+</head>
+<body>
+  <div class="overlay setup-overlay" id="setup-screen">
+    <div class="overlay-content setup-content" id="setup-content"></div>
+  </div>
+
+  <main id="app" hidden>
+    <header>
+      <div class="header-row">
+        <h1>folio</h1>
+        <div class="header-right">
+          <button class="header-user" type="button" id="switch-group-btn" hidden></button>
+          <button class="header-user" type="button" id="switch-user-btn" hidden></button>
+          <span class="sync-dot" id="sync-dot" aria-label="not synced" title="not synced"></span>
+        </div>
+      </div>
+      <p id="stats"></p>
+    </header>
+
+    <nav class="nav-row" id="nav-tabs" aria-label="Views"></nav>
+    <nav class="filter-row" id="filters" aria-label="Task filters"></nav>
+
+    <div id="task-sections"></div>
+  </main>
+
+  <div class="overlay" id="detail-overlay">
+    <div class="overlay-content" id="detail-content"></div>
+  </div>
+
+  <div class="overlay" id="create-overlay">
+    <div class="overlay-content" id="create-content"></div>
+  </div>
+
+  <div class="overlay" id="log-overlay">
+    <div class="overlay-content" id="log-content"></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script async data-id="101502386" src="//static.getclicky.com/js"></script>
+</body>
+</html>

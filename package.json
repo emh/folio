@@ -1,0 +1,17 @@
+{
+  "name": "folio",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -n web,sync -c auto \"npm:dev:web\" \"npm:dev:worker:sync\"",
+    "dev:web": "wds --root-dir app --watch --app-index index.html --hostname 127.0.0.1 --port 8030",
+    "dev:worker:sync": "WRANGLER_LOG_PATH=../../.wrangler/logs wrangler dev --cwd workers/sync --config wrangler.toml --ip 127.0.0.1 --port 8798 --inspector-ip 127.0.0.1 --inspector-port 9244 --persist-to ../../.wrangler/state/sync",
+    "deploy:worker:sync": "wrangler deploy --config workers/sync/wrangler.toml",
+    "check": "node --check app/config.js && node --check app/version.js && node --check app/sw.js && node --check app/model.js && node --check app/storage.js && node --check app/sync.js && node --check app/main.js && node -e \"JSON.parse(require('node:fs').readFileSync('app/manifest.webmanifest', 'utf8'))\" && node --check workers/sync/src/index.js && node --test test/*.test.js"
+  },
+  "devDependencies": {
+    "@web/dev-server": "^0.4.6",
+    "concurrently": "^9.2.1",
+    "wrangler": "^4.68.0"
+  }
+}

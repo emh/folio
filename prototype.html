@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#FFFFF8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Folio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #FFFFF8;
+  --ink: #111;
+  --ink-mid: #555;
+  --ink-light: #999;
+  --ink-faint: #ccc;
+  --red: #8B0000;
+  --red-light: #a52a2a;
+  --rule: #e0dcd6;
+  --hover: rgba(0,0,0,0.02);
+  --font: 'Crimson Pro', 'Palatino Linotype', Palatino, Georgia, serif;
+  --mono: 'SF Mono', 'Menlo', 'Consolas', 'Liberation Mono', monospace;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after {
+  margin: 0; padding: 0; box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font);
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--paper);
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+}
+
+body.no-scroll { overflow: hidden; }
+
+/* ─── Layout ─── */
+
+#app {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 24px;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: 80px;
+}
+
+/* ─── Header ─── */
+
+header { padding-top: 48px; margin-bottom: 32px; }
+
+header h1 {
+  font-family: var(--font);
+  font-size: 44px;
+  font-weight: 300;
+  font-style: italic;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+#stats {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--ink-light);
+  letter-spacing: 0.03em;
+}
+
+/* ─── Nav Tabs ─── */
+
+.nav-row {
+  display: flex;
+  gap: 0;
+  margin-bottom: 8px;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.nav-item {
+  font-size: 14px;
+  font-weight: 400;
+  padding: 6px 0;
+  margin-right: 18px;
+  color: var(--ink-light);
+  cursor: pointer;
+  transition: color 0.15s;
+  white-space: nowrap;
+}
+
+.nav-item:hover { color: var(--ink-mid); }
+.nav-item.active { color: var(--ink); }
+
+/* ─── Filters ─── */
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin-bottom: 16px;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.filter-item {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+  padding: 4px 0;
+  margin-right: 14px;
+  color: var(--ink-light);
+  cursor: pointer;
+  transition: color 0.15s;
+  white-space: nowrap;
+}
+
+.filter-item:hover { color: var(--ink-mid); }
+.filter-item.active { color: var(--ink); }
+
+/* ─── Section Headers ─── */
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  margin-bottom: 8px;
+}
+
+.section-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-light);
+}
+
+.add-btn {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--red);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: color 0.15s;
+}
+
+.add-btn:hover { color: var(--red-light); }
+
+/* ─── Task List ─── */
+
+.task-item {
+  padding: 16px 0;
+  border-top: 1px solid var(--rule);
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.task-item:last-child { border-bottom: 1px solid var(--rule); }
+.task-item:active { opacity: 0.55; }
+
+.task-item.completed {
+  opacity: 0.35;
+}
+
+.task-item.completed:active { opacity: 0.25; }
+
+.task-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--ink-light);
+  letter-spacing: 0.02em;
+  margin-bottom: 3px;
+}
+
+.task-description {
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.3;
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+}
+
+.task-sub {
+  font-size: 14px;
+  color: var(--ink-mid);
+  line-height: 1.4;
+}
+
+.task-due {
+  color: var(--red);
+}
+
+.task-due.past {
+  color: var(--red);
+  font-weight: 500;
+}
+
+/* ─── Empty State ─── */
+
+.empty-state {
+  padding: 32px 0;
+  text-align: center;
+  font-style: italic;
+  color: var(--ink-faint);
+  font-size: 15px;
+}
+
+/* ─── Overlays ─── */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--paper);
+  transform: translateX(100%);
+  transition: transform 0.35s var(--ease), visibility 0s linear 0.35s;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  z-index: 100;
+  visibility: hidden;
+}
+
+.overlay.active {
+  transform: translateX(0);
+  visibility: visible;
+  transition: transform 0.35s var(--ease), visibility 0s linear 0s;
+}
+
+#create-overlay { z-index: 150; }
+#log-overlay { z-index: 200; }
+#reports-overlay { z-index: 100; }
+
+.overlay-content {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px;
+  padding-top: calc(24px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+}
+
+/* ─── Back Button ─── */
+
+.back-btn {
+  font-family: var(--font);
+  font-size: 15px;
+  color: var(--ink-light);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 12px 16px 12px 0;
+  margin-bottom: 20px;
+  display: inline-block;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: color 0.15s;
+}
+
+.back-btn:hover { color: var(--ink); }
+
+/* ─── Detail View ─── */
+
+.detail-description {
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+}
+
+.detail-meta {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--ink-light);
+  letter-spacing: 0.02em;
+  margin-bottom: 6px;
+}
+
+.detail-rule {
+  border: none;
+  border-top: 1px solid var(--rule);
+  margin: 24px 0;
+}
+
+/* ─── Form Fields ─── */
+
+.field-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-light);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.field-input {
+  width: 100%;
+  font-family: var(--font);
+  font-size: 16px;
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--rule);
+  padding: 8px 0;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 20px;
+}
+
+.field-input:focus { border-bottom-color: var(--ink); }
+
+.field-input::placeholder {
+  color: var(--ink-faint);
+  font-style: italic;
+}
+
+.field-textarea {
+  width: 100%;
+  font-family: var(--font);
+  font-size: 16px;
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--rule);
+  padding: 8px 0;
+  outline: none;
+  resize: none;
+  min-height: 60px;
+  transition: border-color 0.2s;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.field-textarea:focus { border-bottom-color: var(--ink); }
+
+.field-textarea::placeholder {
+  color: var(--ink-faint);
+  font-style: italic;
+}
+
+.field-select {
+  width: 100%;
+  font-family: var(--font);
+  font-size: 16px;
+  color: var(--ink);
+  background: var(--paper);
+  border: none;
+  border-bottom: 1px solid var(--rule);
+  padding: 8px 0;
+  outline: none;
+  cursor: pointer;
+  margin-bottom: 20px;
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0 center;
+  padding-right: 16px;
+}
+
+.field-select:focus { border-bottom-color: var(--ink); }
+
+/* ─── Actions ─── */
+
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: baseline;
+}
+
+.action-link {
+  font-family: var(--font);
+  font-size: 15px;
+  color: var(--red);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 10px 0;
+  text-decoration: none;
+  display: inline-block;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: color 0.15s;
+}
+
+.action-link:hover { color: var(--red-light); }
+
+.action-link.muted {
+  color: var(--ink-light);
+}
+
+.action-link.muted:hover { color: var(--ink-mid); }
+
+.action-link.primary {
+  color: var(--paper);
+  background: var(--ink);
+  padding: 10px 24px;
+  font-size: 15px;
+  transition: opacity 0.15s;
+}
+
+.action-link.primary:hover { opacity: 0.8; }
+
+/* ─── Time Log List ─── */
+
+.log-entry {
+  padding: 10px 0;
+  border-top: 1px solid var(--rule);
+}
+
+.log-entry:last-child { border-bottom: 1px solid var(--rule); }
+
+.log-date {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--ink-light);
+  letter-spacing: 0.02em;
+}
+
+.log-duration {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.log-notes {
+  font-size: 14px;
+  color: var(--ink-mid);
+  font-style: italic;
+}
+
+/* ─── Reports ─── */
+
+.report-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.report-bar-label {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--ink-light);
+  letter-spacing: 0.02em;
+  min-width: 80px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.report-bar-track {
+  flex: 1;
+  height: 12px;
+  background: var(--rule);
+  position: relative;
+  overflow: hidden;
+}
+
+.report-bar-fill {
+  height: 100%;
+  background: var(--ink);
+  transition: width 0.5s var(--ease);
+}
+
+.report-bar-value {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--ink-mid);
+  min-width: 40px;
+  flex-shrink: 0;
+}
+
+.report-total {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--ink-light);
+  letter-spacing: 0.02em;
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--rule);
+}
+
+/* ─── Name Prompt ─── */
+
+.name-prompt {
+  position: fixed;
+  inset: 0;
+  background: var(--paper);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.name-prompt-inner {
+  text-align: center;
+  max-width: 320px;
+  padding: 24px;
+}
+
+.name-prompt h1 {
+  font-family: var(--font);
+  font-size: 44px;
+  font-weight: 300;
+  font-style: italic;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  margin-bottom: 24px;
+}
+
+.name-prompt p {
+  font-size: 15px;
+  color: var(--ink-mid);
+  margin-bottom: 28px;
+  font-style: italic;
+}
+
+.name-prompt input {
+  width: 100%;
+  font-family: var(--font);
+  font-size: 20px;
+  text-align: center;
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--rule);
+  padding: 12px 0;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.name-prompt input:focus { border-bottom-color: var(--ink); }
+
+.name-prompt input::placeholder {
+  color: var(--ink-faint);
+  font-style: italic;
+}
+
+.name-hint {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--ink-faint);
+  margin-top: 10px;
+  letter-spacing: 0.02em;
+}
+
+/* ─── Toast ─── */
+
+.toast {
+  position: fixed;
+  bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  background: var(--paper);
+  padding: 8px 20px;
+  border: 1px solid var(--rule);
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s var(--ease);
+  z-index: 9999;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ─── Animations ─── */
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-in {
+  animation: fadeSlideIn 0.45s var(--ease) both;
+}
+
+/* ─── Responsive ─── */
+
+@media (min-width: 700px) {
+  .overlay-content { padding-left: 40px; padding-right: 40px; }
+  #app { padding-left: 40px; padding-right: 40px; }
+}
+
+@media (max-width: 380px) {
+  header h1 { font-size: 36px; }
+  .detail-description { font-size: 24px; }
+  .nav-item { margin-right: 12px; font-size: 13px; }
+}
+</style>
+</head>
+<body>
+
+<div class="name-prompt" id="name-prompt">
+  <div class="name-prompt-inner">
+    <h1>folio</h1>
+    <p>task tracking for small teams</p>
+    <input type="text" id="name-input" placeholder="your name" autocomplete="off" spellcheck="false">
+    <div class="name-hint">press enter</div>
+  </div>
+</div>
+
+<main id="app" style="display:none;">
+  <header>
+    <h1>folio</h1>
+    <p id="stats"></p>
+  </header>
+
+  <nav class="nav-row" id="nav-tabs"></nav>
+  <nav class="filter-row" id="filters"></nav>
+
+  <div id="task-sections"></div>
+</main>
+
+<div class="overlay" id="detail-overlay">
+  <div class="overlay-content" id="detail-content"></div>
+</div>
+
+<div class="overlay" id="create-overlay">
+  <div class="overlay-content" id="create-content"></div>
+</div>
+
+<div class="overlay" id="log-overlay">
+  <div class="overlay-content" id="log-content"></div>
+</div>
+
+<div class="overlay" id="reports-overlay">
+  <div class="overlay-content" id="reports-content"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════
+   Folio — Task Tracking
+   ═══════════════════════════════════════════ */
+
+const STORAGE_KEY = 'folio_v1';
+const USER_KEY = 'folio_user';
+const FRIENDS = ['Evan', 'Maya', 'Lucas', 'Noor'];
+
+const STATUSES = {
+  IN_PROGRESS: 'in_progress',
+  UP_NEXT: 'up_next',
+  COMPLETED: 'completed'
+};
+
+const STATUS_LABELS = {
+  [STATUSES.IN_PROGRESS]: 'In Progress',
+  [STATUSES.UP_NEXT]: 'Up Next',
+  [STATUSES.COMPLETED]: 'Completed'
+};
+
+// ── Seed Data ──────────────────────────────
+
+const SEED = [
+  {
+    id: 1, description: 'Design the landing page layout',
+    creator: 'Evan', assignee: 'Maya', status: STATUSES.IN_PROGRESS,
+    dueDate: '2026-04-18', created: '2026-04-10T09:00:00',
+    timeLogs: [
+      { date: '2026-04-12', duration: 90, notes: 'Wireframes and moodboard' },
+      { date: '2026-04-13', duration: 120, notes: 'High-fidelity mockups' }
+    ]
+  },
+  {
+    id: 2, description: 'Set up CI/CD pipeline',
+    creator: 'Lucas', assignee: 'Lucas', status: STATUSES.IN_PROGRESS,
+    dueDate: '2026-04-16', created: '2026-04-08T14:00:00',
+    timeLogs: [
+      { date: '2026-04-09', duration: 60, notes: 'GitHub Actions config' },
+      { date: '2026-04-11', duration: 45, notes: '' }
+    ]
+  },
+  {
+    id: 3, description: 'Write API documentation',
+    creator: 'Noor', assignee: null, status: STATUSES.UP_NEXT,
+    dueDate: '2026-04-22', created: '2026-04-09T11:00:00',
+    timeLogs: []
+  },
+  {
+    id: 4, description: 'User authentication flow',
+    creator: 'Evan', assignee: null, status: STATUSES.UP_NEXT,
+    dueDate: null, created: '2026-04-07T16:30:00',
+    timeLogs: []
+  },
+  {
+    id: 5, description: 'Database schema design',
+    creator: 'Maya', assignee: 'Noor', status: STATUSES.UP_NEXT,
+    dueDate: '2026-04-20', created: '2026-04-06T10:00:00',
+    timeLogs: []
+  },
+  {
+    id: 6, description: 'Choose hosting provider',
+    creator: 'Lucas', assignee: 'Evan', status: STATUSES.COMPLETED,
+    dueDate: '2026-04-10', created: '2026-04-02T09:00:00',
+    completedDate: '2026-04-09T17:00:00',
+    timeLogs: [
+      { date: '2026-04-03', duration: 30, notes: 'Compared Vercel, Fly, Railway' },
+      { date: '2026-04-05', duration: 45, notes: 'Cost analysis' },
+      { date: '2026-04-09', duration: 20, notes: 'Final decision — Fly.io' }
+    ]
+  },
+  {
+    id: 7, description: 'Set up project repository',
+    creator: 'Evan', assignee: 'Evan', status: STATUSES.COMPLETED,
+    dueDate: null, created: '2026-04-01T08:00:00',
+    completedDate: '2026-04-01T10:00:00',
+    timeLogs: [
+      { date: '2026-04-01', duration: 25, notes: 'Monorepo with Turborepo' }
+    ]
+  },
+  {
+    id: 8, description: 'Implement dark mode toggle',
+    creator: 'Maya', assignee: null, status: STATUSES.UP_NEXT,
+    dueDate: null, created: '2026-04-12T13:00:00',
+    timeLogs: []
+  },
+  {
+    id: 9, description: 'Error tracking integration',
+    creator: 'Noor', assignee: 'Lucas', status: STATUSES.IN_PROGRESS,
+    dueDate: '2026-04-17', created: '2026-04-11T15:00:00',
+    timeLogs: [
+      { date: '2026-04-14', duration: 60, notes: 'Sentry SDK setup' }
+    ]
+  }
+];
+
+// ── State ──────────────────────────────────
+
+const state = {
+  tasks: [],
+  currentUser: null,
+  currentTask: null,
+  view: 'dashboard', // dashboard | reports
+  filter: 'all'      // all | mine | created
+};
+
+// ── Utilities ──────────────────────────────
+
+const $ = id => document.getElementById(id);
+
+function esc(s) {
+  if (!s) return '';
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function formatDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const now = new Date();
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const m = months[d.getMonth()];
+  const day = d.getDate();
+  if (d.getFullYear() !== now.getFullYear()) return `${m} ${day}, ${d.getFullYear()}`;
+  return `${m} ${day}`;
+}
+
+function formatDuration(mins) {
+  if (mins < 60) return `${mins}m`;
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
+
+function totalTime(task) {
+  return task.timeLogs.reduce((s, l) => s + l.duration, 0);
+}
+
+function isDueSoon(dateStr) {
+  if (!dateStr) return false;
+  const due = new Date(dateStr + 'T23:59:59');
+  const now = new Date();
+  const diff = (due - now) / (1000 * 60 * 60 * 24);
+  return diff <= 2 && diff >= 0;
+}
+
+function isPastDue(dateStr) {
+  if (!dateStr) return false;
+  const due = new Date(dateStr + 'T23:59:59');
+  return new Date() > due;
+}
+
+function getWeekLabel(dateStr) {
+  const d = new Date(dateStr);
+  const day = d.getDay();
+  const mon = new Date(d);
+  mon.setDate(d.getDate() - ((day + 6) % 7));
+  return formatDate(mon.toISOString());
+}
+
+function getWeekKey(dateStr) {
+  const d = new Date(dateStr);
+  const day = d.getDay();
+  const mon = new Date(d);
+  mon.setDate(d.getDate() - ((day + 6) % 7));
+  return mon.toISOString().split('T')[0];
+}
+
+// ── Persistence ────────────────────────────
+
+function save() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ tasks: state.tasks }));
+  } catch(e) {}
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const d = JSON.parse(raw);
+      if (d.tasks && d.tasks.length) {
+        state.tasks = d.tasks;
+        return;
+      }
+    }
+  } catch(e) {}
+  state.tasks = JSON.parse(JSON.stringify(SEED));
+}
+
+function loadUser() {
+  try {
+    const u = localStorage.getItem(USER_KEY);
+    if (u) { state.currentUser = u; return true; }
+  } catch(e) {}
+  return false;
+}
+
+function saveUser(name) {
+  state.currentUser = name;
+  try { localStorage.setItem(USER_KEY, name); } catch(e) {}
+}
+
+// ── Toast ──────────────────────────────────
+
+let toastTimer;
+function toast(msg) {
+  const el = $('toast');
+  el.textContent = msg;
+  el.classList.add('visible');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('visible'), 2000);
+}
+
+// ── Stats ──────────────────────────────────
+
+function renderStats() {
+  const total = state.tasks.length;
+  const inProgress = state.tasks.filter(t => t.status === STATUSES.IN_PROGRESS).length;
+  const done = state.tasks.filter(t => t.status === STATUSES.COMPLETED).length;
+  const allMins = state.tasks.reduce((s, t) => s + totalTime(t), 0);
+  $('stats').textContent = `${total} tasks · ${inProgress} active · ${done} done · ${formatDuration(allMins)} logged`;
+}
+
+// ── Nav ────────────────────────────────────
+
+function renderNav() {
+  $('nav-tabs').innerHTML = [
+    { key: 'dashboard', label: 'Dashboard' },
+    { key: 'reports', label: 'Reports' }
+  ].map(n =>
+    `<span class="nav-item${state.view === n.key ? ' active' : ''}" data-view="${n.key}">${n.label}</span>`
+  ).join('');
+}
+
+// ── Filters ───────────────────────────────
+
+function renderFilters() {
+  if (state.view !== 'dashboard') {
+    $('filters').innerHTML = '';
+    return;
+  }
+  const filters = [
+    { key: 'all', label: 'All Tasks' },
+    { key: 'mine', label: 'Assigned to Me' },
+    { key: 'created', label: 'Created by Me' }
+  ];
+  $('filters').innerHTML = filters.map(f =>
+    `<span class="filter-item${state.filter === f.key ? ' active' : ''}" data-filter="${f.key}">${f.label}</span>`
+  ).join('');
+}
+
+// ── Task List ─────────────────────────────
+
+function getFilteredTasks() {
+  let tasks = [...state.tasks];
+  if (state.filter === 'mine') {
+    tasks = tasks.filter(t => t.assignee === state.currentUser);
+  } else if (state.filter === 'created') {
+    tasks = tasks.filter(t => t.creator === state.currentUser);
+  }
+  return tasks;
+}
+
+function renderTaskItem(t) {
+  const time = totalTime(t);
+  const assigneeStr = t.assignee || 'unassigned';
+  let dueLine = '';
+  if (t.dueDate && t.status !== STATUSES.COMPLETED) {
+    const past = isPastDue(t.dueDate);
+    const soon = isDueSoon(t.dueDate);
+    dueLine = ` · <span class="task-due${past ? ' past' : ''}">${past ? 'overdue' : (soon ? 'due soon' : 'due ' + formatDate(t.dueDate + 'T00:00:00'))}</span>`;
+  }
+  return `
+    <article class="task-item${t.status === STATUSES.COMPLETED ? ' completed' : ''}" data-id="${t.id}">
+      <div class="task-meta">
+        <span>${esc(assigneeStr)}${dueLine}</span>
+        <span>${time > 0 ? formatDuration(time) : ''}</span>
+      </div>
+      <h2 class="task-description">${esc(t.description)}</h2>
+      <div class="task-sub">${esc(t.creator)}</div>
+    </article>
+  `;
+}
+
+function renderDashboard() {
+  const tasks = getFilteredTasks();
+  const sections = $('task-sections');
+
+  const inProgress = tasks.filter(t => t.status === STATUSES.IN_PROGRESS);
+  const upNext = tasks.filter(t => t.status === STATUSES.UP_NEXT);
+  const completed = tasks.filter(t => t.status === STATUSES.COMPLETED);
+
+  let html = '';
+
+  // In Progress
+  html += `<div class="section-header"><span class="section-label">In Progress · ${inProgress.length}</span></div>`;
+  if (inProgress.length) {
+    html += inProgress.map(renderTaskItem).join('');
+  } else {
+    html += '<div class="empty-state">Nothing in progress.</div>';
+  }
+
+  // Up Next
+  html += `<div class="section-header"><span class="section-label">Up Next · ${upNext.length}</span><button class="add-btn" id="add-task-btn">+ new task</button></div>`;
+  if (upNext.length) {
+    html += upNext.map(renderTaskItem).join('');
+  } else {
+    html += '<div class="empty-state">No upcoming tasks.</div>';
+  }
+
+  // Completed
+  html += `<div class="section-header"><span class="section-label">Completed · ${completed.length}</span></div>`;
+  if (completed.length) {
+    html += completed.map(renderTaskItem).join('');
+  } else {
+    html += '<div class="empty-state">Nothing completed yet.</div>';
+  }
+
+  sections.innerHTML = html;
+}
+
+// ── Reports ───────────────────────────────
+
+function renderReportsView() {
+  const sections = $('task-sections');
+
+  // Gather all time logs across all tasks
+  const allLogs = [];
+  state.tasks.forEach(t => {
+    t.timeLogs.forEach(l => {
+      allLogs.push({ ...l, taskId: t.id, task: t.description, creator: t.creator, assignee: t.assignee });
+    });
+  });
+
+  // Group by week
+  const weeks = {};
+  allLogs.forEach(l => {
+    const wk = getWeekKey(l.date);
+    if (!weeks[wk]) weeks[wk] = { key: wk, label: getWeekLabel(l.date), total: 0 };
+    weeks[wk].total += l.duration;
+  });
+
+  const sorted = Object.values(weeks).sort((a, b) => b.key.localeCompare(a.key));
+  const maxMins = Math.max(...sorted.map(w => w.total), 1);
+
+  let html = '<div class="section-header"><span class="section-label">Time per Week</span></div>';
+
+  // Filters for reports
+  html += '<div class="filter-row" id="report-filters">';
+  html += `<span class="filter-item${!state.reportAssignee && !state.reportCreator ? ' active' : ''}" data-rfilter="all">All</span>`;
+  FRIENDS.forEach(f => {
+    html += `<span class="filter-item${state.reportAssignee === f ? ' active' : ''}" data-rassignee="${esc(f)}">${esc(f)}</span>`;
+  });
+  html += '</div>';
+
+  // Compute filtered data
+  let filteredLogs = allLogs;
+  if (state.reportAssignee) {
+    filteredLogs = allLogs.filter(l => l.assignee === state.reportAssignee);
+  }
+  if (state.reportCreator) {
+    filteredLogs = filteredLogs.filter(l => l.creator === state.reportCreator);
+  }
+
+  const fWeeks = {};
+  filteredLogs.forEach(l => {
+    const wk = getWeekKey(l.date);
+    if (!fWeeks[wk]) fWeeks[wk] = { key: wk, label: getWeekLabel(l.date), total: 0 };
+    fWeeks[wk].total += l.duration;
+  });
+
+  const fSorted = Object.values(fWeeks).sort((a, b) => b.key.localeCompare(a.key));
+  const fMax = Math.max(...fSorted.map(w => w.total), 1);
+
+  if (fSorted.length === 0) {
+    html += '<div class="empty-state">No time logged yet.</div>';
+  } else {
+    fSorted.forEach(w => {
+      const pct = (w.total / fMax) * 100;
+      html += `
+        <div class="report-bar-row">
+          <span class="report-bar-label">${w.label}</span>
+          <div class="report-bar-track"><div class="report-bar-fill" style="width:${pct}%"></div></div>
+          <span class="report-bar-value">${formatDuration(w.total)}</span>
+        </div>
+      `;
+    });
+
+    const grandTotal = fSorted.reduce((s, w) => s + w.total, 0);
+    html += `<div class="report-total">${formatDuration(grandTotal)} total across ${fSorted.length} week${fSorted.length !== 1 ? 's' : ''}</div>`;
+  }
+
+  sections.innerHTML = html;
+}
+
+// ── Detail View ───────────────────────────
+
+function showDetail(id) {
+  const task = state.tasks.find(t => t.id === id);
+  if (!task) return;
+  state.currentTask = task;
+  renderDetail(task);
+  $('detail-overlay').classList.add('active');
+  $('detail-overlay').scrollTop = 0;
+  document.body.classList.add('no-scroll');
+}
+
+function renderDetail(task) {
+  const dc = $('detail-content');
+  const time = totalTime(task);
+  const assigneeStr = task.assignee || 'unassigned';
+
+  let dueLine = '';
+  if (task.dueDate) {
+    dueLine = ` · due ${formatDate(task.dueDate + 'T00:00:00')}`;
+    if (task.status !== STATUSES.COMPLETED && isPastDue(task.dueDate)) dueLine = ' · overdue';
+  }
+
+  let html = `
+    <button class="back-btn" data-action="back">← Back</button>
+    <h1 class="detail-description" id="desc-display">${esc(task.description)}</h1>
+    <p class="detail-meta">created by ${esc(task.creator)} · ${formatDate(task.created)}</p>
+    <p class="detail-meta">${esc(assigneeStr)}${dueLine}${time > 0 ? ' · ' + formatDuration(time) + ' logged' : ''}</p>
+    <p class="detail-meta">${STATUS_LABELS[task.status]}</p>
+
+    <hr class="detail-rule">
+
+    <label class="field-label">Description</label>
+    <textarea class="field-textarea" id="edit-desc" placeholder="What needs to be done…">${esc(task.description)}</textarea>
+
+    <label class="field-label">Assignee</label>
+    <select class="field-select" id="edit-assignee">
+      <option value="">Unassigned</option>
+      ${FRIENDS.map(f => `<option value="${esc(f)}"${task.assignee === f ? ' selected' : ''}>${esc(f)}</option>`).join('')}
+    </select>
+
+    <label class="field-label">Due Date</label>
+    <input type="date" class="field-input" id="edit-due" value="${task.dueDate || ''}">
+  `;
+
+  // Status-specific actions
+  html += '<hr class="detail-rule"><div class="detail-actions">';
+
+  if (task.status === STATUSES.UP_NEXT) {
+    html += '<button class="action-link primary" data-action="start">Start task</button>';
+  }
+
+  if (task.status === STATUSES.IN_PROGRESS) {
+    html += '<button class="action-link" data-action="log-time">Log time</button>';
+    html += '<button class="action-link primary" data-action="complete">Mark done</button>';
+    html += '<button class="action-link muted" data-action="move-back">Move to up next</button>';
+  }
+
+  if (task.status === STATUSES.COMPLETED) {
+    html += '<button class="action-link muted" data-action="reopen">Reopen</button>';
+  }
+
+  html += '<button class="action-link muted" data-action="delete">Delete</button>';
+  html += '</div>';
+
+  // Time log history
+  if (task.timeLogs.length > 0) {
+    html += '<hr class="detail-rule"><div class="section-label">Time Log</div>';
+    const sorted = [...task.timeLogs].sort((a, b) => b.date.localeCompare(a.date));
+    sorted.forEach(l => {
+      html += `
+        <div class="log-entry">
+          <div class="log-date">${formatDate(l.date + 'T00:00:00')}</div>
+          <div class="log-duration">${formatDuration(l.duration)}</div>
+          ${l.notes ? `<div class="log-notes">${esc(l.notes)}</div>` : ''}
+        </div>
+      `;
+    });
+  }
+
+  dc.innerHTML = html;
+
+  // Bind inline edit listeners
+  $('edit-desc').addEventListener('blur', () => {
+    const val = $('edit-desc').value.trim();
+    if (val && val !== task.description) {
+      task.description = val;
+      save();
+      toast('Updated');
+    }
+  });
+
+  $('edit-assignee').addEventListener('change', () => {
+    task.assignee = $('edit-assignee').value || null;
+    save();
+    toast(task.assignee ? `Assigned to ${task.assignee}` : 'Unassigned');
+  });
+
+  $('edit-due').addEventListener('change', () => {
+    task.dueDate = $('edit-due').value || null;
+    save();
+    toast(task.dueDate ? 'Due date set' : 'Due date removed');
+  });
+}
+
+// ── Create Task ───────────────────────────
+
+function showCreateForm() {
+  const cc = $('create-content');
+  cc.innerHTML = `
+    <button class="back-btn" data-action="back">← Back</button>
+    <h1 class="detail-description">New task</h1>
+
+    <label class="field-label">Description</label>
+    <textarea class="field-textarea" id="new-desc" placeholder="What needs to be done…"></textarea>
+
+    <label class="field-label">Assignee</label>
+    <select class="field-select" id="new-assignee">
+      <option value="">Unassigned</option>
+      ${FRIENDS.map(f => `<option value="${esc(f)}">${esc(f)}</option>`).join('')}
+    </select>
+
+    <label class="field-label">Due Date</label>
+    <input type="date" class="field-input" id="new-due">
+
+    <hr class="detail-rule">
+    <div class="detail-actions">
+      <button class="action-link primary" data-action="save-new">Create task</button>
+    </div>
+  `;
+
+  $('create-overlay').classList.add('active');
+  $('create-overlay').scrollTop = 0;
+  setTimeout(() => { const ta = $('new-desc'); if (ta) ta.focus(); }, 380);
+}
+
+function saveNewTask() {
+  const desc = $('new-desc').value.trim();
+  if (!desc) { toast('Add a description'); return; }
+
+  const task = {
+    id: Date.now() + Math.floor(Math.random() * 1000),
+    description: desc,
+    creator: state.currentUser,
+    assignee: $('new-assignee').value || null,
+    status: STATUSES.UP_NEXT,
+    dueDate: $('new-due').value || null,
+    created: new Date().toISOString(),
+    timeLogs: []
+  };
+
+  state.tasks.unshift(task);
+  save();
+  closeOverlay('create-overlay');
+  renderAll();
+  toast('Task created');
+}
+
+// ── Log Time ──────────────────────────────
+
+function showLogForm() {
+  const lc = $('log-content');
+  const today = new Date().toISOString().split('T')[0];
+
+  lc.innerHTML = `
+    <button class="back-btn" data-action="back">← Back</button>
+    <h1 class="detail-description">Log time</h1>
+    <p class="detail-meta">${esc(state.currentTask.description)}</p>
+
+    <hr class="detail-rule">
+
+    <label class="field-label">Date</label>
+    <input type="date" class="field-input" id="log-date" value="${today}">
+
+    <label class="field-label">Duration (minutes)</label>
+    <input type="number" class="field-input" id="log-duration" placeholder="30" min="1" inputmode="numeric">
+
+    <label class="field-label">Notes (optional)</label>
+    <input type="text" class="field-input" id="log-notes" placeholder="What did you work on…">
+
+    <hr class="detail-rule">
+    <div class="detail-actions">
+      <button class="action-link primary" data-action="save-log">Save</button>
+    </div>
+  `;
+
+  $('log-overlay').classList.add('active');
+  $('log-overlay').scrollTop = 0;
+  setTimeout(() => { const d = $('log-duration'); if (d) d.focus(); }, 380);
+}
+
+function saveLogEntry() {
+  const dur = parseInt($('log-duration').value);
+  if (!dur || dur < 1) { toast('Enter a duration'); return; }
+
+  const entry = {
+    date: $('log-date').value || new Date().toISOString().split('T')[0],
+    duration: dur,
+    notes: $('log-notes').value.trim()
+  };
+
+  state.currentTask.timeLogs.push(entry);
+  save();
+  closeOverlay('log-overlay');
+  renderDetail(state.currentTask);
+  toast(`${formatDuration(dur)} logged`);
+}
+
+// ── Actions ───────────────────────────────
+
+function startTask(task) {
+  task.status = STATUSES.IN_PROGRESS;
+  task.assignee = state.currentUser;
+  save();
+  renderDetail(task);
+  toast('Started — assigned to you');
+}
+
+function completeTask(task) {
+  task.status = STATUSES.COMPLETED;
+  task.completedDate = new Date().toISOString();
+  save();
+  closeOverlay('detail-overlay');
+  renderAll();
+  toast('Done!');
+}
+
+function moveBack(task) {
+  task.status = STATUSES.UP_NEXT;
+  save();
+  renderDetail(task);
+  toast('Moved to up next');
+}
+
+function reopenTask(task) {
+  task.status = STATUSES.UP_NEXT;
+  delete task.completedDate;
+  save();
+  renderDetail(task);
+  toast('Reopened');
+}
+
+function deleteTask(task) {
+  state.tasks = state.tasks.filter(t => t.id !== task.id);
+  save();
+  closeOverlay('detail-overlay');
+  renderAll();
+  toast('Task deleted');
+}
+
+// ── Navigation ────────────────────────────
+
+function closeOverlay(id) {
+  $(id).classList.remove('active');
+  if (!$('detail-overlay').classList.contains('active') &&
+      !$('create-overlay').classList.contains('active') &&
+      !$('reports-overlay').classList.contains('active')) {
+    document.body.classList.remove('no-scroll');
+  }
+}
+
+function goBack(overlay) {
+  closeOverlay(overlay);
+  if (overlay === 'detail-overlay') {
+    renderAll();
+  }
+}
+
+// ── Render All ────────────────────────────
+
+function renderAll() {
+  renderStats();
+  renderNav();
+  renderFilters();
+  if (state.view === 'dashboard') {
+    renderDashboard();
+  } else {
+    renderReportsView();
+  }
+}
+
+// ── Events ────────────────────────────────
+
+function bindEvents() {
+  // Name prompt
+  $('name-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const name = $('name-input').value.trim();
+      if (name) {
+        saveUser(name);
+        $('name-prompt').style.display = 'none';
+        $('app').style.display = '';
+        renderAll();
+      }
+    }
+  });
+
+  // Nav tabs
+  $('nav-tabs').addEventListener('click', (e) => {
+    const item = e.target.closest('.nav-item');
+    if (!item) return;
+    state.view = item.dataset.view;
+    state.reportAssignee = null;
+    state.reportCreator = null;
+    renderAll();
+  });
+
+  // Filters
+  $('filters').addEventListener('click', (e) => {
+    const item = e.target.closest('.filter-item');
+    if (!item) return;
+    state.filter = item.dataset.filter;
+    renderAll();
+  });
+
+  // Task sections — delegated clicks
+  $('task-sections').addEventListener('click', (e) => {
+    // Add button
+    if (e.target.closest('#add-task-btn')) {
+      showCreateForm();
+      return;
+    }
+    // Task item
+    const item = e.target.closest('.task-item');
+    if (item) {
+      showDetail(parseInt(item.dataset.id));
+      return;
+    }
+    // Report filters
+    const rf = e.target.closest('[data-rfilter]');
+    if (rf) {
+      state.reportAssignee = null;
+      state.reportCreator = null;
+      renderAll();
+      return;
+    }
+    const ra = e.target.closest('[data-rassignee]');
+    if (ra) {
+      const name = ra.dataset.rassignee;
+      state.reportAssignee = state.reportAssignee === name ? null : name;
+      renderAll();
+      return;
+    }
+  });
+
+  // Detail overlay actions
+  $('detail-content').addEventListener('click', (e) => {
+    const action = e.target.closest('[data-action]');
+    if (!action) return;
+    const act = action.dataset.action;
+    if (act === 'back') { goBack('detail-overlay'); return; }
+    if (act === 'start') { startTask(state.currentTask); return; }
+    if (act === 'complete') { completeTask(state.currentTask); return; }
+    if (act === 'move-back') { moveBack(state.currentTask); return; }
+    if (act === 'reopen') { reopenTask(state.currentTask); return; }
+    if (act === 'delete') { deleteTask(state.currentTask); return; }
+    if (act === 'log-time') { showLogForm(); return; }
+  });
+
+  // Create overlay actions
+  $('create-content').addEventListener('click', (e) => {
+    const action = e.target.closest('[data-action]');
+    if (!action) return;
+    const act = action.dataset.action;
+    if (act === 'back') { closeOverlay('create-overlay'); return; }
+    if (act === 'save-new') { saveNewTask(); return; }
+  });
+
+  // Log overlay actions
+  $('log-content').addEventListener('click', (e) => {
+    const action = e.target.closest('[data-action]');
+    if (!action) return;
+    const act = action.dataset.action;
+    if (act === 'back') { closeOverlay('log-overlay'); return; }
+    if (act === 'save-log') { saveLogEntry(); return; }
+  });
+
+  // Keyboard
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if ($('log-overlay').classList.contains('active')) { closeOverlay('log-overlay'); return; }
+      if ($('create-overlay').classList.contains('active')) { closeOverlay('create-overlay'); return; }
+      if ($('detail-overlay').classList.contains('active')) { goBack('detail-overlay'); return; }
+    }
+  });
+
+  // Popstate
+  window.addEventListener('popstate', () => {
+    if ($('log-overlay').classList.contains('active')) { closeOverlay('log-overlay'); return; }
+    if ($('create-overlay').classList.contains('active')) { closeOverlay('create-overlay'); return; }
+    if ($('detail-overlay').classList.contains('active')) { goBack('detail-overlay'); return; }
+  });
+}
+
+// ── Init ──────────────────────────────────
+
+function init() {
+  load();
+
+  if (loadUser()) {
+    $('name-prompt').style.display = 'none';
+    $('app').style.display = '';
+    renderAll();
+  } else {
+    setTimeout(() => $('name-input').focus(), 100);
+  }
+
+  bindEvents();
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+name = "folio-sync"
+main = "src/index.js"
+compatibility_date = "2026-04-01"
+workers_dev = true
+
+[[durable_objects.bindings]]
+name = "FOLIO_ROOM"
+class_name = "FolioRoom"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = [ "FolioRoom" ]
+
+[vars]
+ALLOWED_ORIGINS = "http://localhost:8030,http://127.0.0.1:8030,https://emh.github.io,https://emh.io"
