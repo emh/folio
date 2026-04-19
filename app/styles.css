@@ -430,6 +430,34 @@ header h1 {
   background-position: right 0 center;
 }
 
+.date-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.date-field .field-input {
+  margin-bottom: 0;
+}
+
+.date-clear {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--rule);
+  background: transparent;
+  color: var(--ink-light);
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1;
+}
+
+.date-clear:hover {
+  color: var(--ink);
+}
+
 .create-calendar {
   margin: -4px 0 20px;
 }

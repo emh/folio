@@ -30,8 +30,8 @@ const ui = {
   addingUser: false,
   pendingGroup: null,
   joinCode: "",
-  createCalendarWeekStart: "",
-  createCalendarSelectedDate: "",
+  taskCalendarWeekStart: "",
+  taskCalendarSelectedDate: "",
   syncStatus: "idle",
   syncGroupCode: null
 };
@@ -562,11 +562,19 @@ function renderDetail() {
         ${group.members.map(name => `<option value="${esc(name)}"${task.assignee === name ? " selected" : ""}>${esc(name)}</option>`).join("")}
       </select>
 
+      <div class="create-calendar" id="edit-task-calendar"></div>
+
       <label class="field-label" for="edit-scheduled">Scheduled Date</label>
-      <input type="date" class="field-input" id="edit-scheduled" value="${task.scheduledDate || ""}">
+      <div class="date-field">
+        <input type="date" class="field-input" id="edit-scheduled" value="${task.scheduledDate || ""}">
+        <button class="date-clear" type="button" data-action="clear-edit-scheduled" aria-label="Clear scheduled date">x</button>
+      </div>
 
       <label class="field-label" for="edit-due">Due Date</label>
-      <input type="date" class="field-input" id="edit-due" value="${task.dueDate || ""}">
+      <div class="date-field">
+        <input type="date" class="field-input" id="edit-due" value="${task.dueDate || ""}">
+        <button class="date-clear" type="button" data-action="clear-edit-due" aria-label="Clear due date">x</button>
+      </div>
     `;
   } else if (task.details) {
     html += `
@@ -581,7 +589,6 @@ function renderDetail() {
       ${renderStatusActions(task)}
       ${canEdit && !isEditing ? '<button class="action-link" type="button" data-action="edit-task">Edit</button>' : ""}
       ${!isEditing ? '<button class="action-link muted" type="button" data-action="duplicate-task">Duplicate</button>' : ""}
-      ${isEditing ? '<button class="action-link muted" type="button" data-action="done-editing">Done editing</button>' : ""}
       <button class="action-link muted" type="button" data-action="${confirmingDelete ? "confirm-delete" : "delete"}">${confirmingDelete ? "Delete task?" : "Delete"}</button>
     </div>
   `;
@@ -600,12 +607,15 @@ function renderDetail() {
   }
 
   $("detail-content").innerHTML = html;
-  if (isEditing) bindDetailFields(task);
+  if (isEditing) {
+    bindDetailFields(task);
+    renderTaskCalendar("edit");
+  }
 }
 
 function renderStatusActions(task) {
   if (task.status === STATUSES.UP_NEXT) {
-    return '<button class="action-link primary" type="button" data-action="start">Start task</button>';
+    return '<button class="action-link primary" type="button" data-action="start">Start</button>';
   }
 
   if (task.status === STATUSES.IN_PROGRESS) {
@@ -668,13 +678,13 @@ function bindDetailFields(task) {
   });
 }
 
-function resetCreateCalendar() {
-  ui.createCalendarWeekStart = isoDateFromLocalDate(startOfWeek());
-  ui.createCalendarSelectedDate = "";
+function resetTaskCalendar() {
+  ui.taskCalendarWeekStart = isoDateFromLocalDate(startOfWeek());
+  ui.taskCalendarSelectedDate = "";
 }
 
-function createCalendarDates() {
-  const weekStart = localDateFromIsoDate(ui.createCalendarWeekStart) || startOfWeek();
+function taskCalendarDates() {
+  const weekStart = localDateFromIsoDate(ui.taskCalendarWeekStart) || startOfWeek();
   return Array.from({ length: 7 }, (_, index) => {
     const date = addDays(weekStart, index);
     return {
@@ -706,22 +716,22 @@ function taskCalendarLabels(task, dateStr) {
   return labels.join(" + ");
 }
 
-function renderCreateCalendar() {
-  const calendar = $("new-task-calendar");
+function renderTaskCalendar(prefix) {
+  const calendar = $(`${prefix}-task-calendar`);
   if (!calendar) return;
 
-  const assignee = $("new-assignee")?.value || "";
+  const assignee = $(`${prefix}-assignee`)?.value || "";
   if (!assignee) {
-    ui.createCalendarSelectedDate = "";
+    ui.taskCalendarSelectedDate = "";
     calendar.hidden = true;
     calendar.innerHTML = "";
     return;
   }
 
   calendar.hidden = false;
-  const dates = createCalendarDates();
+  const dates = taskCalendarDates();
   const today = isoDateFromLocalDate(new Date());
-  const selectedDate = ui.createCalendarSelectedDate;
+  const selectedDate = ui.taskCalendarSelectedDate;
   const selectedTasks = selectedDate ? createCalendarTasksForDate(assignee, selectedDate) : [];
 
   calendar.innerHTML = `
@@ -742,12 +752,12 @@ function renderCreateCalendar() {
       <button class="calendar-nav" type="button" data-action="calendar-next-week" aria-label="Next week">&gt;</button>
     </div>
     <div class="calendar-task-list">
-      ${renderCreateCalendarTaskList(assignee, selectedDate, selectedTasks)}
+      ${renderTaskCalendarTaskList(assignee, selectedDate, selectedTasks)}
     </div>
   `;
 }
 
-function renderCreateCalendarTaskList(assignee, selectedDate, tasks) {
+function renderTaskCalendarTaskList(assignee, selectedDate, tasks) {
   if (!selectedDate) return "";
   if (!tasks.length) return "";
 
@@ -759,17 +769,17 @@ function renderCreateCalendarTaskList(assignee, selectedDate, tasks) {
   `).join("");
 }
 
-function shiftCreateCalendarWeek(days) {
-  const weekStart = localDateFromIsoDate(ui.createCalendarWeekStart) || startOfWeek();
-  ui.createCalendarWeekStart = isoDateFromLocalDate(addDays(weekStart, days));
-  ui.createCalendarSelectedDate = "";
-  renderCreateCalendar();
+function shiftTaskCalendarWeek(days, prefix) {
+  const weekStart = localDateFromIsoDate(ui.taskCalendarWeekStart) || startOfWeek();
+  ui.taskCalendarWeekStart = isoDateFromLocalDate(addDays(weekStart, days));
+  ui.taskCalendarSelectedDate = "";
+  renderTaskCalendar(prefix);
 }
 
 function showCreateForm(sourceTask = null) {
   const group = activeGroup();
   const source = sourceTask || {};
-  resetCreateCalendar();
+  resetTaskCalendar();
   $("create-content").innerHTML = `
     <button class="back-btn" type="button" data-action="back">back</button>
     <h1 class="detail-description">${sourceTask ? "Duplicate task" : "New task"}</h1>
@@ -792,17 +802,23 @@ function showCreateForm(sourceTask = null) {
     <div class="create-calendar" id="new-task-calendar"></div>
 
     <label class="field-label" for="new-scheduled">Scheduled Date</label>
-    <input type="date" class="field-input" id="new-scheduled" value="${source.scheduledDate || ""}">
+    <div class="date-field">
+      <input type="date" class="field-input" id="new-scheduled" value="${source.scheduledDate || ""}">
+      <button class="date-clear" type="button" data-action="clear-new-scheduled" aria-label="Clear scheduled date">x</button>
+    </div>
 
     <label class="field-label" for="new-due">Due Date</label>
-    <input type="date" class="field-input" id="new-due" value="${source.dueDate || ""}">
+    <div class="date-field">
+      <input type="date" class="field-input" id="new-due" value="${source.dueDate || ""}">
+      <button class="date-clear" type="button" data-action="clear-new-due" aria-label="Clear due date">x</button>
+    </div>
 
     <div class="detail-actions">
       <button class="action-link primary" type="button" data-action="save-new">Create task</button>
     </div>
   `;
 
-  renderCreateCalendar();
+  renderTaskCalendar("new");
   openOverlay("create-overlay");
   setTimeout(() => $("new-name")?.focus(), 380);
 }
@@ -1314,14 +1330,34 @@ function bindEvents() {
     if (!task && action !== "back") return;
 
     if (action === "back") {
-      closeOverlay("detail-overlay");
-      renderAll();
+      if (ui.detailMode === "edit") {
+        ui.detailMode = "read";
+        renderDetail();
+      } else {
+        closeOverlay("detail-overlay");
+        renderAll();
+      }
     } else if (action === "edit-task") {
+      resetTaskCalendar();
       ui.detailMode = "edit";
       renderDetail();
-    } else if (action === "done-editing") {
-      ui.detailMode = "read";
-      renderDetail();
+    } else if (action === "calendar-prev-week") {
+      shiftTaskCalendarWeek(-7, "edit");
+    } else if (action === "calendar-next-week") {
+      shiftTaskCalendarWeek(7, "edit");
+    } else if (action === "calendar-select-day") {
+      ui.taskCalendarSelectedDate = button.dataset.date || "";
+      renderTaskCalendar("edit");
+    } else if (action === "clear-edit-scheduled") {
+      $("edit-scheduled").value = "";
+      if (task.scheduledDate) {
+        commitChanges([{ entityType: "task", entityId: task.id, field: "scheduledDate", value: null }], "Scheduled date removed");
+      }
+    } else if (action === "clear-edit-due") {
+      $("edit-due").value = "";
+      if (task.dueDate) {
+        commitChanges([{ entityType: "task", entityId: task.id, field: "dueDate", value: null }], "Due date removed");
+      }
     } else if (action === "start") {
       commitChanges([
         { entityType: "task", entityId: task.id, field: "status", value: STATUSES.IN_PROGRESS },
@@ -1366,18 +1402,22 @@ function bindEvents() {
     } else if (action === "save-new") {
       saveNewTask();
     } else if (action === "calendar-prev-week") {
-      shiftCreateCalendarWeek(-7);
+      shiftTaskCalendarWeek(-7, "new");
     } else if (action === "calendar-next-week") {
-      shiftCreateCalendarWeek(7);
+      shiftTaskCalendarWeek(7, "new");
     } else if (action === "calendar-select-day") {
-      ui.createCalendarSelectedDate = button.dataset.date || "";
-      renderCreateCalendar();
+      ui.taskCalendarSelectedDate = button.dataset.date || "";
+      renderTaskCalendar("new");
+    } else if (action === "clear-new-scheduled") {
+      $("new-scheduled").value = "";
+    } else if (action === "clear-new-due") {
+      $("new-due").value = "";
     }
   });
 
   $("create-content").addEventListener("change", event => {
     if (event.target?.id === "new-assignee") {
-      renderCreateCalendar();
+      renderTaskCalendar("new");
     }
   });
 
