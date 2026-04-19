@@ -13,9 +13,11 @@ export const STATUS_LABELS = {
 export const TASK_FIELDS = [
   "name",
   "details",
+  "location",
   "creator",
   "assignee",
   "status",
+  "scheduledDate",
   "dueDate",
   "createdAt",
   "completedAt",
@@ -138,9 +140,11 @@ export function normalizeTask(input = {}) {
     id: String(input.id || createId()),
     name,
     details: String(input.details || "").trim(),
+    location: String(input.location || "").trim(),
     creator: input.creator || "",
     assignee: input.assignee || null,
     status: Object.values(STATUSES).includes(input.status) ? input.status : STATUSES.UP_NEXT,
+    scheduledDate: input.scheduledDate || null,
     dueDate: input.dueDate || null,
     createdAt: input.createdAt || input.created || new Date().toISOString(),
     completedAt: input.completedAt || input.completedDate || null,
@@ -282,7 +286,7 @@ function applyTimeLogMutation(state, mutation) {
 
 function coerceTaskField(field, value) {
   if (field === "deleted") return Boolean(value);
-  if (field === "assignee" || field === "dueDate" || field === "completedAt") return value || null;
+  if (field === "assignee" || field === "scheduledDate" || field === "dueDate" || field === "completedAt") return value || null;
   if (field === "status") return Object.values(STATUSES).includes(value) ? value : STATUSES.UP_NEXT;
   return String(value || "").trim();
 }

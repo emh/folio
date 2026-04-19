@@ -1,5 +1,5 @@
 const STATUSES = ["up_next", "in_progress", "completed"];
-const TASK_FIELDS = new Set(["name", "details", "creator", "assignee", "status", "dueDate", "createdAt", "completedAt", "deleted"]);
+const TASK_FIELDS = new Set(["name", "details", "location", "creator", "assignee", "status", "scheduledDate", "dueDate", "createdAt", "completedAt", "deleted"]);
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const CODE_LENGTH = 6;
 
@@ -519,9 +519,11 @@ function normalizeTask(input = {}, members = [], creatorMembers = members) {
     id: String(input.id || ""),
     name,
     details: String(input.details || "").trim().slice(0, 5000),
+    location: String(input.location || "").trim().slice(0, 500),
     creator: displayMemberName(creatorMembers, input.creator),
     assignee: input.assignee ? displayMemberName(members, input.assignee) : null,
     status: STATUSES.includes(input.status) ? input.status : "up_next",
+    scheduledDate: input.scheduledDate && isIsoDate(input.scheduledDate) ? input.scheduledDate : null,
     dueDate: input.dueDate && isIsoDate(input.dueDate) ? input.dueDate : null,
     createdAt: typeof input.createdAt === "string" ? input.createdAt : new Date().toISOString(),
     completedAt: typeof input.completedAt === "string" && input.completedAt ? input.completedAt : null,
@@ -550,9 +552,9 @@ function normalizeTaskFieldValue(field, value, members, creatorMembers = members
     if (!member) throw new Error("Invalid assignee");
     return member;
   }
-  if (field === "dueDate") {
+  if (field === "scheduledDate" || field === "dueDate") {
     if (!value) return null;
-    if (!isIsoDate(value)) throw new Error("Invalid due date");
+    if (!isIsoDate(value)) throw new Error(field === "scheduledDate" ? "Invalid scheduled date" : "Invalid due date");
     return value;
   }
   if (field === "completedAt") return value || null;

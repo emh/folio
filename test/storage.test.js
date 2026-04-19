@@ -24,8 +24,10 @@ test("stored state normalization keeps multiple group states", () => {
             id: 7,
             name: "Legacy",
             details: "Longer notes",
+            location: "Garage",
             creator: "Evan",
             status: "in_progress",
+            scheduledDate: "2026-04-17",
             created: "2026-04-16T00:00:00.000Z",
             completedDate: null
           }
@@ -57,6 +59,8 @@ test("stored state normalization keeps multiple group states", () => {
   assert.equal(state.groups.HOME1.tasks[0].id, "7");
   assert.equal(state.groups.HOME1.tasks[0].name, "Legacy");
   assert.equal(state.groups.HOME1.tasks[0].details, "Longer notes");
+  assert.equal(state.groups.HOME1.tasks[0].location, "Garage");
+  assert.equal(state.groups.HOME1.tasks[0].scheduledDate, "2026-04-17");
   assert.equal(state.groups.HOME1.tasks[0].createdAt, "2026-04-16T00:00:00.000Z");
   assert.equal(state.groups.HOME1.timeLogs[0].taskId, "7");
   assert.equal(state.groups.HOME1.timeLogs[0].duration, 30);

@@ -44,9 +44,11 @@ test("task fields use last-write-wins per field", () => {
       id: "task-1",
       name: "Original",
       details: "Original details",
+      location: "Kitchen",
       creator: "Evan",
       assignee: null,
       status: STATUSES.UP_NEXT,
+      scheduledDate: "2026-04-17",
       dueDate: null,
       createdAt: "2026-04-16T10:00:00.000Z",
       completedAt: null,
@@ -81,6 +83,8 @@ test("task fields use last-write-wins per field", () => {
 
   assert.equal(state.tasks[0].name, "Newer");
   assert.equal(state.tasks[0].details, "Original details");
+  assert.equal(state.tasks[0].location, "Kitchen");
+  assert.equal(state.tasks[0].scheduledDate, "2026-04-17");
 });
 
 test("time report grouping filters by task creator and assignee snapshot", () => {

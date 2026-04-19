@@ -73,9 +73,11 @@ test("worker materialization applies LWW and filters deleted tasks", () => {
       id: "task-1",
       name: "Original",
       details: "Original details",
+      location: "Kitchen",
       creator: "Evan",
       assignee: "Shantel",
       status: "up_next",
+      scheduledDate: "2026-04-17",
       dueDate: null,
       createdAt: "2026-04-16T00:00:00.000Z",
       completedAt: null,
@@ -123,6 +125,8 @@ test("worker materialization applies LWW and filters deleted tasks", () => {
   const materialized = materializeMutations([newName, oldName, timeLog, create], MEMBERS);
   assert.equal(materialized.tasks[0].name, "New");
   assert.equal(materialized.tasks[0].details, "Original details");
+  assert.equal(materialized.tasks[0].location, "Kitchen");
+  assert.equal(materialized.tasks[0].scheduledDate, "2026-04-17");
   assert.equal(materialized.timeLogs[0].duration, 25);
 
   const deleted = materializeMutations([
@@ -155,9 +159,11 @@ test("worker materialization preserves former creators and unassigns former assi
       id: "task-former",
       name: "Former task",
       details: "",
+      location: "",
       creator: "Evan",
       assignee: "Evan",
       status: "up_next",
+      scheduledDate: null,
       dueDate: null,
       createdAt: "2026-04-16T00:00:00.000Z",
       completedAt: null,
@@ -168,6 +174,19 @@ test("worker materialization preserves former creators and unassigns former assi
   const materialized = materializeMutations([create], members, removedMembers);
   assert.equal(materialized.tasks[0].creator, "Evan");
   assert.equal(materialized.tasks[0].assignee, null);
+});
+
+test("worker validation rejects invalid scheduled dates", () => {
+  const invalid = mutation({
+    id: "m-scheduled",
+    entityType: "task",
+    entityId: "task-1",
+    field: "scheduledDate",
+    value: "April 17",
+    author: "Genevieve"
+  });
+
+  assert.throws(() => validateMutation(invalid, MEMBERS), /Invalid scheduled date/);
 });
 
 function mutation(overrides) {
